@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: bookvoice-postgres
+    environment:
+      POSTGRES_USER: bookvoice_user
+      POSTGRES_PASSWORD: bookvoice_password
+      POSTGRES_DB: bookvoice_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bookvoice_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache & Queue
+  redis:
+    image: redis:7-alpine
+    container_name: bookvoice-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # FastAPI Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bookvoice-app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      - ./uploads:/app/uploads
+      - ./app/static/audio:/app/app/static/audio
+    environment:
+      - DATABASE_URL=postgresql://bookvoice_user:bookvoice_password@postgres:5432/bookvoice_db
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/2
+      - SECRET_KEY=your-production-secret-key-here
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Celery Worker
+  celery:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bookvoice-celery
+    command: celery -A app.tasks.audio_tasks worker --loglevel=info
+    volumes:
+      - .:/app
+      - ./uploads:/app/uploads
+      - ./app/static/audio:/app/app/static/audio
+    environment:
+      - DATABASE_URL=postgresql://bookvoice_user:bookvoice_password@postgres:5432/bookvoice_db
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/2
+      - SECRET_KEY=your-production-secret-key-here
+    depends_on:
+      - postgres
+      - redis
+      - app
+
+volumes:
+  postgres_data:
+  redis_data:

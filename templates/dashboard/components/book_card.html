@@ -1,0 +1,38 @@
+<!-- Book Card Component -->
+<div class="bg-white rounded-lg shadow hover:shadow-lg transition p-6 card-hover">
+    <div class="flex items-start justify-between mb-4">
+        <div class="flex-1">
+            <h3 class="font-semibold text-lg text-gray-900 mb-1">{{ book.title }}</h3>
+            <p class="text-sm text-gray-600">{{ book.author or 'Unknown Author' }}</p>
+        </div>
+        <span class="px-2 py-1 text-xs font-semibold rounded {% if book.status == 'ready' %}bg-green-100 text-green-800{% elif book.status == 'processing' %}bg-yellow-100 text-yellow-800{% else %}bg-red-100 text-red-800{% endif %}">
+            {{ book.status }}
+        </span>
+    </div>
+    
+    <div class="space-y-2 text-sm text-gray-600 mb-4">
+        <div class="flex justify-between">
+            <span class="font-medium">Words:</span>
+            <span>{{ "{:,}".format(book.word_count) }}</span>
+        </div>
+        <div class="flex justify-between">
+            <span class="font-medium">Size:</span>
+            <span>{{ (book.file_size / 1024 / 1024)|round(2) }} MB</span>
+        </div>
+        <div class="flex justify-between">
+            <span class="font-medium">Type:</span>
+            <span>{{ book.file_type.upper() }}</span>
+        </div>
+    </div>
+    
+    <div class="flex space-x-2">
+        <a href="/books/{{ book.id }}" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white text-center px-4 py-2 rounded text-sm">
+            View Details
+        </a>
+        {% if book.status == 'ready' %}
+        <button onclick="generateAudio({{ book.id }})" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded text-sm">
+            Generate Audio
+        </button>
+        {% endif %}
+    </div>
+</div>
