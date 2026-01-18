@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}BookVoice - eBook to Audio{% endblock %}</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Alpine.js for interactivity -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/styles.css">
+    
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-gray-50 min-h-screen">
+    
+    <!-- Navigation -->
+    {% block navigation %}
+    <nav class="bg-white shadow-sm" x-data="{ mobileMenuOpen: false }">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="/dashboard" class="flex items-center space-x-2">
+                        <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                        </svg>
+                        <span class="text-xl font-bold text-gray-900">BookVoice</span>
+                    </a>
+                </div>
+                
+                <div class="hidden md:flex items-center space-x-4" id="user-nav">
+                    <!-- Will be populated by JavaScript if user is logged in -->
+                </div>
+                
+                <div class="md:hidden flex items-center">
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile menu -->
+        <div x-show="mobileMenuOpen" class="md:hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1" id="mobile-user-nav">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </div>
+    </nav>
+    {% endblock %}
+    
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
+    
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+        <div class="bg-white rounded-lg p-6 flex flex-col items-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+            <p class="mt-4 text-gray-700">Loading...</p>
+        </div>
+    </div>
+    
+    <!-- Base JavaScript -->
+    <script>
+        // API base URL
+        const API_BASE = '/api/v1';
+        
+        // Check authentication
+        function isAuthenticated() {
+            return localStorage.getItem('access_token') !== null;
+        }
+        
+        // Get auth token
+        function getAuthToken() {
+            return localStorage.getItem('access_token');
+        }
+        
+        // API request helper
+        async function apiRequest(url, options = {}) {
+            const token = getAuthToken();
+            const headers = {
+                'Content-Type': 'application/json',
+                ...options.headers
+            };
+            
+            if (token && !options.skipAuth) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            
+            const response = await fetch(API_BASE + url, {
+                ...options,
+                headers
+            });
+            
+            if (response.status === 401) {
+                // Unauthorized - redirect to login
+                localStorage.clear();
+                window.location.href = '/login';
+                return null;
+            }
+            
+            return response;
+        }
+        
+        // Show toast notification
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            const colors = {
+                success: 'bg-green-500',
+                error: 'bg-red-500',
+                warning: 'bg-yellow-500',
+                info: 'bg-blue-500'
+            };
+            
+            toast.className = `${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg fade-in`;
+            toast.textContent = message;
+            
+            document.getElementById('toast-container').appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+        
+        // Show/hide loading overlay
+        function showLoading() {
+            document.getElementById('loading-overlay').classList.remove('hidden');
+        }
+        
+        function hideLoading() {
+            document.getElementById('loading-overlay').classList.add('hidden');
+        }
+        
+        // Update navigation with user info
+        async function updateNavigation() {
+            if (!isAuthenticated()) return;
+            
+            try {
+                const user = JSON.parse(localStorage.getItem('user'));
+                if (!user) return;
+                
+                const navHTML = `
+                    <a href="/dashboard" class="text-gray-700 hover:text-purple-600 px-3 py-2">Dashboard</a>
+                    <a href="/books/upload" class="text-gray-700 hover:text-purple-600 px-3 py-2">Upload Book</a>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-gray-700">${user.username}</span>
+                        <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Logout</button>
+                    </div>
+                `;
+                
+                document.getElementById('user-nav').innerHTML = navHTML;
+                document.getElementById('mobile-user-nav').innerHTML = navHTML;
+            } catch (e) {
+                console.error('Failed to update navigation:', e);
+            }
+        }
+        
+        // Logout function
+        async function logout() {
+            try {
+                await apiRequest('/auth/logout', { method: 'POST' });
+            } catch (e) {
+                console.error('Logout error:', e);
+            } finally {
+                localStorage.clear();
+                window.location.href = '/login';
+            }
+        }
+        
+        // Initialize navigation on page load
+        document.addEventListener('DOMContentLoaded', updateNavigation);
+    </script>
+    
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>
