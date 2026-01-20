@@ -77,7 +77,7 @@ flowchart TB
     API2 --> REDIS
 
     REDIS --> CELERY[Celery Workers]:::worker
----
+```
 
 ## Prerequisites
 
