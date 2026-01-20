@@ -66,7 +66,7 @@ flowchart TB
     classDef db fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#000000
     classDef worker fill:#fff3e0,stroke:#ef6c00,stroke-width:2px,color:#000000
 
-    LB[Nginx Load Balancer]:::infra
+    LB[Web Server/ Load Balancer]:::infra
 
     LB --> API1[FastAPI Instance 1]:::api
     LB --> API2[FastAPI Instance 2]:::api
