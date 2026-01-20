@@ -3,7 +3,7 @@
 ## Table of Contents
 1. [Overview](#overview)
 2. [Features](#features)
-3. [Architecture](#architecture)
+3. [System Architecture](#system-architecture)
 4. [Prerequisites](#prerequisites)
 5. [Installation](#installation)
 6. [Configuration](#configuration)
@@ -569,7 +569,7 @@ This project is licensed under the MIT License.
 
 ## Support
 
-For support, email asimmohammed@gmail.com or open an issue on GitHub.
+For support, email asimmohammed2311@gmail.com or open an issue on GitHub.
 
 ---
 
