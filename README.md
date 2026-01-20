@@ -59,11 +59,12 @@ BookVoice is an SaaS application that converts eBooks into high-quality audio us
 The application follows a scalable microservice-friendly architecture using FastAPI, Redis, Celery, and PostgreSQL.
 
 ```mermaid
+%%{init: {"themeVariables": {"primaryTextColor": "#000000"}}}%%
 flowchart TB
-    classDef api fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
-    classDef infra fill:#fce4ec,stroke:#ad1457,stroke-width:2px
-    classDef db fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
-    classDef worker fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+    classDef api fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#000000
+    classDef infra fill:#fce4ec,stroke:#ad1457,stroke-width:2px,color:#000000
+    classDef db fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#000000
+    classDef worker fill:#fff3e0,stroke:#ef6c00,stroke-width:2px,color:#000000
 
     LB[Nginx Load Balancer]:::infra
 
