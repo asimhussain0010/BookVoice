@@ -1,4 +1,4 @@
-# BookVoice - Production-Grade eBook to Audio Platform
+# BookVoice - eBook to Audio Platform
 
 ## Table of Contents
 1. [Overview](#overview)
@@ -18,7 +18,7 @@
 
 ## Overview
 
-BookVoice is an enterprise-ready SaaS application that converts eBooks into high-quality audio using advanced Text-to-Speech technology. Built with Python, FastAPI, and modern web technologies.
+BookVoice is an SaaS application that converts eBooks into high-quality audio using advanced Text-to-Speech technology. Built with Python, FastAPI, and modern web technologies.
 
 ### Technology Stack
 - **Backend**: FastAPI, Python 3.11+
@@ -54,35 +54,29 @@ BookVoice is an enterprise-ready SaaS application that converts eBooks into high
 
 ---
 
-## Architecture
+## System Architecture
 
-```
-┌─────────────────────────────────────────┐
-│         Load Balancer (Nginx)           │
-└─────────────┬───────────────────────────┘
-              │
-    ┌─────────┴─────────┐
-    │                   │
-┌───▼─────┐      ┌──────▼────┐
-│ FastAPI │      │  FastAPI  │
-│ Instance│      │  Instance │
-└───┬─────┘      └──────┬────┘
-    │                   │
-    └─────────┬─────────┘
-              │
-    ┌─────────┴─────────┐
-    │                   │
-┌───▼────────┐   ┌──────▼─────┐
-│ PostgreSQL │   │   Redis    │
-│  Database  │   │ Cache/Queue│
-└────────────┘   └──────┬─────┘
-                        │
-                 ┌──────▼─────┐
-                 │   Celery   │
-                 │   Workers  │
-                 └────────────┘
-```
+The application follows a scalable microservice-friendly architecture using FastAPI, Redis, Celery, and PostgreSQL.
 
+```mermaid
+flowchart TB
+    classDef api fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    classDef infra fill:#fce4ec,stroke:#ad1457,stroke-width:2px
+    classDef db fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    classDef worker fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+
+    LB[Nginx Load Balancer]:::infra
+
+    LB --> API1[FastAPI Instance 1]:::api
+    LB --> API2[FastAPI Instance 2]:::api
+
+    API1 --> DB[(PostgreSQL)]:::db
+    API2 --> DB
+
+    API1 --> REDIS[Redis Cache / Queue]:::infra
+    API2 --> REDIS
+
+    REDIS --> CELERY[Celery Workers]:::worker
 ---
 
 ## Prerequisites
@@ -96,7 +90,7 @@ BookVoice is an enterprise-ready SaaS application that converts eBooks into high
 
 ### Optional
 - Docker & Docker Compose (recommended)
-- Nginx (for production)
+- Nginx or Apache
 
 ---
 
@@ -106,8 +100,8 @@ BookVoice is an enterprise-ready SaaS application that converts eBooks into high
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/bookvoice.git
-cd bookvoice
+git clone https://github.com/asimhussain0010/BookVoice.git
+cd BookVoice
 
 # Copy environment file
 cp .env.example .env
@@ -129,7 +123,7 @@ docker-compose logs -f
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/bookvoice.git
+git clone https://github.com/asimhussain0010/BookVoice.git
 cd bookvoice
 
 # Create virtual environment
@@ -246,7 +240,7 @@ docker-compose -f docker-compose.prod.yml up -d
 - **API Documentation**: http://localhost:8000/docs
 - **Health Check**: http://localhost:8000/health
 
----
+--- 
 
 ## API Documentation
 
@@ -287,15 +281,15 @@ import requests
 
 # Register user
 response = requests.post("http://localhost:8000/api/v1/auth/register", json={
-    "email": "user@example.com",
-    "username": "johndoe",
+    "email": "asim@example.com",
+    "username": "asim",
     "password": "SecurePass123",
     "password_confirm": "SecurePass123"
 })
 
 # Login
 response = requests.post("http://localhost:8000/api/v1/auth/login", json={
-    "email": "user@example.com",
+    "email": "asim@example.com",
     "password": "SecurePass123"
 })
 token = response.json()["access_token"]
@@ -551,11 +545,18 @@ pytest tests/test_auth.py
 
 ## Contributing
 
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
+Contributions are welcome and appreciated. If you’d like to contribute, please follow the steps below:
+
+1. Fork this repository to your GitHub account  
+2. Create a new feature branch from `main`  
+   (`git checkout -b feature/your-feature-name`)  
+3. Make your changes and commit them with a clear, descriptive message  
+4. Push the branch to your fork  
+   (`git push origin feature/your-feature-name`)  
+5. Open a Pull Request and briefly describe the changes you’ve made  
+
+Thank you for taking the time to improve this project.
+
 
 ---
 
@@ -567,7 +568,7 @@ This project is licensed under the MIT License.
 
 ## Support
 
-For support, email support@bookvoice.com or open an issue on GitHub.
+For support, email asimmohammed@gmail.com or open an issue on GitHub.
 
 ---
 
@@ -579,7 +580,6 @@ For support, email support@bookvoice.com or open an issue on GitHub.
 - [ ] Audio editing capabilities
 - [ ] Podcast-style formatting
 - [ ] Social sharing features
-- [ ] Mobile applications (iOS/Android)
 - [ ] Advanced analytics dashboard
 - [ ] Team collaboration features
 - [ ] API webhooks
