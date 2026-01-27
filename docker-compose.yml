@@ -51,7 +51,7 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - CELERY_BROKER_URL=redis://redis:6379/1
       - CELERY_RESULT_BACKEND=redis://redis:6379/2
-      - SECRET_KEY=your-production-secret-key-here
+      - SECRET_KEY=ea91425d04f26fb5ce9f077489b2cc4756088dee2b6e5abfdb8e20198589c116
     depends_on:
       postgres:
         condition: service_healthy
@@ -74,7 +74,7 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - CELERY_BROKER_URL=redis://redis:6379/1
       - CELERY_RESULT_BACKEND=redis://redis:6379/2
-      - SECRET_KEY=your-production-secret-key-here
+      - SECRET_KEY=ea91425d04f26fb5ce9f077489b2cc4756088dee2b6e5abfdb8e20198589c116
     depends_on:
       - postgres
       - redis

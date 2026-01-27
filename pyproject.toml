@@ -5,12 +5,12 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "bookvoice"
 version = "1.0.0"
-description = "Production-grade eBook to Audio conversion platform"
+description = "eBook to Audio conversion platform"
 readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
 authors = [
-    {name = "BookVoice Team", email = "info@bookvoice.com"}
+    {name = "BookVoice By Mohammed Asim Hussain", email = "asimmohammed2311@gmail.com"}
 ]
 keywords = ["ebook", "audio", "tts", "text-to-speech", "converter"]
 classifiers = [
@@ -62,12 +62,6 @@ dev = [
     "mypy==1.8.0",
     "isort==5.13.2",
 ]
-
-[project.urls]
-Homepage = "https://github.com/yourorg/bookvoice"
-Documentation = "https://bookvoice.readthedocs.io"
-Repository = "https://github.com/yourorg/bookvoice.git"
-"Bug Tracker" = "https://github.com/yourorg/bookvoice/issues"
 
 [tool.setuptools]
 packages = ["app"]

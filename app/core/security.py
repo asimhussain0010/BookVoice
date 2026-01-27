@@ -2,6 +2,10 @@
 Security Module
 Handles password hashing, JWT token generation/validation, and authentication
 """
+import hmac
+import hashlib
+from datetime import datetime, timedelta
+from app.config import settings
 
 from datetime import datetime, timedelta
 from typing import Optional, Dict, Any
@@ -25,6 +29,8 @@ def hash_password(password: str) -> str:
     Returns:
         Hashed password string
     """
+    # return pwd_context.hash(password)
+    password = password.encode("utf-8")[:72].decode("utf-8", errors="ignore")
     return pwd_context.hash(password)
 
 
@@ -158,3 +164,42 @@ def verify_token_type(payload: Dict[str, Any], expected_type: str) -> bool:
         True if token type matches
     """
     return payload.get("type") == expected_type
+
+
+# security update with the generate download token
+def generate_download_token(audio_id: int, user_id: int, expires_in_minutes: int = 60) -> str:
+    expiry = datetime.utcnow() + timedelta(minutes=expires_in_minutes)
+    expiry_str = expiry.strftime('%Y%m%d%H%M%S')
+
+    message = f"{audio_id}:{user_id}:{expiry_str}"
+    signature = hmac.new(
+        settings.SECRET_KEY.encode(),
+        message.encode(),
+        hashlib.sha256
+    ).hexdigest()
+
+    return f"{audio_id}:{user_id}:{expiry_str}:{signature}"
+
+
+def verify_download_token(token: str) -> tuple[int, int]:
+    parts = token.split(":")
+    if len(parts) != 4:
+        raise ValueError("Invalid token format")
+
+    audio_id, user_id, expiry_str, signature = parts
+    expiry = datetime.strptime(expiry_str, "%Y%m%d%H%M%S")
+
+    if datetime.utcnow() > expiry:
+        raise ValueError("Token expired")
+
+    message = f"{audio_id}:{user_id}:{expiry_str}"
+    expected_signature = hmac.new(
+        settings.SECRET_KEY.encode(),
+        message.encode(),
+        hashlib.sha256
+    ).hexdigest()
+
+    if not hmac.compare_digest(signature, expected_signature):
+        raise ValueError("Invalid signature")
+
+    return int(audio_id), int(user_id)
