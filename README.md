@@ -22,7 +22,7 @@ BookVoice is an SaaS application that converts eBooks into high-quality audio us
 
 ### Technology Stack
 - **Backend**: FastAPI, Python 3.11+
-- **Database**: PostgreSQL (production) / SQLite (development)
+- **Database**: PostgreSQL
 - **Cache/Queue**: Redis
 - **Task Queue**: Celery
 - **TTS Engine**: gTTS (Google TTS) / pyttsx3
