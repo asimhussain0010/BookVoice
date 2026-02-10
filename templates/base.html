@@ -1,98 +1,362 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}BookVoice - eBook to Audio{% endblock %}</title>
+    <title>{% block title %}BookVoice - AI Audio Books{% endblock %}</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🎵</text></svg>">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geologica:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Alpine.js for interactivity -->
+    <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="/static/css/styles.css">
+    <!-- Icons (Lucide) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Geologica', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        accent: {
+                            50: '#fdf4ff',
+                            100: '#fae8ff',
+                            200: '#f5d0fe',
+                            300: '#f0abfc',
+                            400: '#e879f9',
+                            500: '#d946ef',
+                            600: '#c026d3',
+                            700: '#a21caf',
+                            800: '#86198f',
+                            900: '#701a75',
+                        },
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'slide-down': 'slideDown 0.3s ease-out',
+                        'scale-in': 'scaleIn 0.3s ease-out',
+                        'shimmer': 'shimmer 2s infinite',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 3s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        slideDown: {
+                            '0%': { transform: 'translateY(-10px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        scaleIn: {
+                            '0%': { transform: 'scale(0.95)', opacity: '0' },
+                            '100%': { transform: 'scale(1)', opacity: '1' },
+                        },
+                        shimmer: {
+                            '0%': { backgroundPosition: '-1000px 0' },
+                            '100%': { backgroundPosition: '1000px 0' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                    },
+                }
+            }
+        }
+    </script>
     
     <style>
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        * {
+            font-family: 'Geologica', system-ui, sans-serif;
         }
-        .fade-in {
-            animation: fadeIn 0.3s ease-out;
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
         }
-        .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        
+        ::-webkit-scrollbar-track {
+            background: transparent;
         }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(100, 116, 139, 0.3);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(100, 116, 139, 0.5);
+        }
+        
+        .dark ::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.3);
+        }
+        
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background: rgba(148, 163, 184, 0.5);
+        }
+        
+        /* Glassmorphism */
         .glass {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .dark .glass {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(51, 65, 85, 0.3);
+        }
+        
+        /* Gradient Text */
+        .gradient-text {
+            background: linear-gradient(135deg, #0ea5e9 0%, #d946ef 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Shimmer Effect */
+        .shimmer {
+            background: linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.2) 50%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            background-size: 1000px 100%;
+            animation: shimmer 2s infinite;
+        }
+        
+        /* Card Hover Effect */
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .dark .card-hover:hover {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Background Patterns */
+        .bg-grid {
+            background-image: 
+                linear-gradient(rgba(148, 163, 184, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(148, 163, 184, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+        
+        .dark .bg-grid {
+            background-image: 
+                linear-gradient(rgba(71, 85, 105, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(71, 85, 105, 0.1) 1px, transparent 1px);
+        }
+        
+        /* Noise Texture */
+        .noise {
+            position: relative;
+        }
+        
+        .noise::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            pointer-events: none;
+        }
+        
+        /* Loading Skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, #f3f4f6 0%, #e5e7eb 50%, #f3f4f6 100%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        
+        .dark .skeleton {
+            background: linear-gradient(90deg, #1e293b 0%, #334155 50%, #1e293b 100%);
         }
     </style>
     
-    {% block extra_head %}{% endblock %}
+    {% block extra_css %}{% endblock %}
 </head>
-<body class="bg-gray-50 min-h-screen">
+
+<body class="h-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-colors duration-300" 
+      x-data="{ 
+          darkMode: localStorage.getItem('darkMode') === 'true',
+          sidebarOpen: true,
+          userMenuOpen: false,
+          init() {
+              this.$watch('darkMode', value => {
+                  localStorage.setItem('darkMode', value);
+                  if (value) {
+                      document.documentElement.classList.add('dark');
+                  } else {
+                      document.documentElement.classList.remove('dark');
+                  }
+              });
+              
+              // Initialize dark mode
+              if (this.darkMode) {
+                  document.documentElement.classList.add('dark');
+              }
+              
+              // Update navigation with user info
+              updateNavigation();
+          }
+      }">
+    
+    <!-- Background Elements -->
+    <div class="fixed inset-0 bg-grid noise pointer-events-none"></div>
+    <div class="fixed inset-0 bg-gradient-to-br from-primary-500/5 via-transparent to-accent-500/5 pointer-events-none"></div>
     
     <!-- Navigation -->
-    {% block navigation %}
-    <nav class="bg-white shadow-sm" x-data="{ mobileMenuOpen: false }">
+    <nav class="fixed top-0 left-0 right-0 z-50 glass border-b border-slate-200 dark:border-slate-700">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <a href="/dashboard" class="flex items-center space-x-2">
-                        <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
-                        </svg>
-                        <span class="text-xl font-bold text-gray-900">BookVoice</span>
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <div class="flex items-right space-x-3">
+                    <button @click="sidebarOpen = !sidebarOpen" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors lg:hidden">
+                        <i data-lucide="menu" class="w-5 h-5"></i>
+                    </button>
+                    <a href="/dashboard" class="flex items-center space-x-3 group">
+                        <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-accent-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                            <i data-lucide="audio-lines" class="w-6 h-6 text-white"></i>
+                        </div>
+                        <span class="text-xl font-bold gradient-text hidden sm:block">BookVoice</span>
                     </a>
                 </div>
                 
-                <div class="hidden md:flex items-center space-x-4" id="user-nav">
-                    <!-- Will be populated by JavaScript if user is logged in -->
+                <!-- Search Bar (Optional) -->
+                <div class="hidden md:flex flex-1 max-w-md mx-8">
+                    <div class="relative w-full">
+                        <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                        <input type="text" 
+                               placeholder="Search books, audio files..." 
+                               class="w-full pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all">
+                    </div>
                 </div>
                 
-                <div class="md:hidden flex items-center">
-                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="text-gray-600">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                        </svg>
+                <!-- Right Actions -->
+                <div class="flex items-center space-x-2">
+                    <!-- Dark Mode Toggle -->
+                    <button @click="darkMode = !darkMode" 
+                            class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                        <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+                        <i data-lucide="moon" class="w-5 h-5 block dark:hidden"></i>
                     </button>
+                    
+                    <!-- Notifications -->
+                    <button class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors relative">
+                        <i data-lucide="bell" class="w-5 h-5"></i>
+                        <span class="absolute top-1 right-1 w-2 h-2 bg-accent-500 rounded-full"></span>
+                    </button>
+                    
+                    <!-- User Menu -->
+                    <div class="relative">
+                        <button @click="userMenuOpen = !userMenuOpen" 
+                                class="flex items-center space-x-2 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                                id="user-menu-button">
+                            <div class="w-8 h-8 bg-gradient-to-br from-primary-500 to-accent-500 rounded-lg flex items-center justify-center">
+                                <span class="text-white text-sm font-semibold" id="user-initial">U</span>
+                            </div>
+                            <i data-lucide="chevron-down" class="w-4 h-4 hidden sm:block"></i>
+                        </button>
+                        
+                        <!-- Dropdown -->
+                        <div x-show="userMenuOpen" 
+                             @click.away="userMenuOpen = false"
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 scale-95"
+                             x-transition:enter-end="opacity-100 scale-100"
+                             class="absolute right-0 mt-2 w-56 glass rounded-xl shadow-lg py-2">
+                            <div class="px-4 py-3 border-b border-slate-200 dark:border-slate-700">
+                                <p class="text-sm font-semibold" id="user-name-display">Guest</p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400" id="user-email-display"></p>
+                            </div>
+                            <a href="/dashboard" class="flex items-center space-x-2 px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                                <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                                <span class="text-sm">Dashboard</span>
+                            </a>
+                            <a href="/books/upload" class="flex items-center space-x-2 px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                                <i data-lucide="upload" class="w-4 h-4"></i>
+                                <span class="text-sm">Upload Book</span>
+                            </a>
+                            <hr class="my-2 border-slate-200 dark:border-slate-700">
+                            <button onclick="logout()" class="w-full flex items-center space-x-2 px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-red-600">
+                                <i data-lucide="log-out" class="w-4 h-4"></i>
+                                <span class="text-sm">Logout</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-        
-        <!-- Mobile menu -->
-        <div x-show="mobileMenuOpen" class="md:hidden">
-            <div class="px-2 pt-2 pb-3 space-y-1" id="mobile-user-nav">
-                <!-- Will be populated by JavaScript -->
             </div>
         </div>
     </nav>
-    {% endblock %}
     
     <!-- Main Content -->
-    <main>
+    <div class="pt-16 h-full">
         {% block content %}{% endblock %}
-    </main>
+    </div>
     
-    <!-- Toast Notifications -->
+    <!-- Toast Notifications Container -->
     <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
     
     <!-- Loading Overlay -->
-    <div id="loading-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-        <div class="bg-white rounded-lg p-6 flex flex-col items-center">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
-            <p class="mt-4 text-gray-700">Loading...</p>
+    <div id="loading-overlay" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+        <div class="glass rounded-2xl p-8 flex flex-col items-center">
+            <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-primary-500"></div>
+            <p class="mt-4 text-lg font-medium">Loading...</p>
         </div>
     </div>
     
-    <!-- Base JavaScript -->
+    <!-- Global Scripts -->
     <script>
         // API base URL
         const API_BASE = '/api/v1';
+        
+        // Initialize Lucide Icons
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
         
         // Check authentication
         function isAuthenticated() {
@@ -104,7 +368,7 @@
             return localStorage.getItem('access_token');
         }
         
-        // API request helper
+        // API request helper with proper error handling
         async function apiRequest(url, options = {}) {
             const token = getAuthToken();
             const headers = {
@@ -131,24 +395,40 @@
             return response;
         }
         
-        // Show toast notification
+        // Toast Notification System
         function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
+            
             const colors = {
                 success: 'bg-green-500',
                 error: 'bg-red-500',
                 warning: 'bg-yellow-500',
-                info: 'bg-blue-500'
+                info: 'bg-primary-500'
             };
             
-            toast.className = `${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg fade-in`;
-            toast.textContent = message;
+            const icons = {
+                success: 'check-circle',
+                error: 'x-circle',
+                warning: 'alert-triangle',
+                info: 'info'
+            };
             
-            document.getElementById('toast-container').appendChild(toast);
+            toast.className = `${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-3 animate-slide-down`;
+            toast.innerHTML = `
+                <i data-lucide="${icons[type]}" class="w-5 h-5"></i>
+                <span class="font-medium">${message}</span>
+                <button onclick="this.parentElement.remove()" class="ml-4 hover:opacity-80">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            `;
+            
+            container.appendChild(toast);
+            lucide.createIcons();
             
             setTimeout(() => {
                 toast.remove();
-            }, 3000);
+            }, 5000);
         }
         
         // Show/hide loading overlay
@@ -168,17 +448,23 @@
                 const user = JSON.parse(localStorage.getItem('user'));
                 if (!user) return;
                 
-                const navHTML = `
-                    <a href="/dashboard" class="text-gray-700 hover:text-purple-600 px-3 py-2">Dashboard</a>
-                    <a href="/books/upload" class="text-gray-700 hover:text-purple-600 px-3 py-2">Upload Book</a>
-                    <div class="flex items-center space-x-2">
-                        <span class="text-gray-700">${user.username}</span>
-                        <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Logout</button>
-                    </div>
-                `;
+                // Update user display
+                const userInitial = document.getElementById('user-initial');
+                const userName = document.getElementById('user-name-display');
+                const userEmail = document.getElementById('user-email-display');
                 
-                document.getElementById('user-nav').innerHTML = navHTML;
-                document.getElementById('mobile-user-nav').innerHTML = navHTML;
+                if (userInitial && user.username) {
+                    userInitial.textContent = user.username.charAt(0).toUpperCase();
+                }
+                if (userName && user.username) {
+                    userName.textContent = user.username;
+                }
+                if (userEmail && user.email) {
+                    userEmail.textContent = user.email;
+                }
+                
+                // Reinitialize icons
+                lucide.createIcons();
             } catch (e) {
                 console.error('Failed to update navigation:', e);
             }
@@ -195,11 +481,8 @@
                 window.location.href = '/login';
             }
         }
-        
-        // Initialize navigation on page load
-        document.addEventListener('DOMContentLoaded', updateNavigation);
     </script>
     
-    {% block extra_scripts %}{% endblock %}
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

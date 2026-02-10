@@ -134,9 +134,6 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 # Install dependencies
 pip install -r requirements.txt
 
-# Install system dependencies (Ubuntu/Debian)
-sudo apt-get install ffmpeg espeak postgresql redis-server
-
 # Create database
 sudo -u postgres psql
 CREATE DATABASE bookvoice_db;
@@ -155,7 +152,7 @@ alembic upgrade head
 redis-server
 
 # Start Celery worker (in separate terminal)
-celery -A app.tasks.audio_tasks worker --loglevel=info
+celery -A app.tasks.audio_tasks.celery_app worker -P solo --loglevel=info
 
 # Start application
 uvicorn app.main:app --reload
@@ -388,7 +385,7 @@ sudo certbot renew --dry-run
 
 ## Security Considerations
 
-### Production Security Checklist
+###  Security Checklist
 
 - [ ] Change default SECRET_KEY to strong random value
 - [ ] Use HTTPS in production (SSL certificate)
